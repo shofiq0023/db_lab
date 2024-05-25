@@ -1,7 +1,8 @@
+USE DBLAB;
 
 ----------------------- COMPANY ----------------------------------
 CREATE TABLE company(
-	serial_no SERIAL UNIQUE NOT NULL,
+	serial_no INT IDENTITY(1, 1) UNIQUE NOT NULL,
 	company_id INT PRIMARY KEY,
 	company_code VARCHAR(100) NOT NULL,
 	company_name VARCHAR(200) NOT NULL,
@@ -20,7 +21,7 @@ DELETE FROM company WHERE company_id = 1011;
 
 ----------------------- DEPARTMENT ----------------------------------
 CREATE TABLE department(
-	serial_no SERIAL UNIQUE NOT NULL,
+	serial_no INT IDENTITY(1, 1) UNIQUE NOT NULL,
 	dept_code VARCHAR(100) PRIMARY KEY,
 	dept_name VARCHAR(100) NOT NULL,
 	dept_desc TEXT,
@@ -44,7 +45,7 @@ DELETE FROM department WHERE dept_code = 'fnc';
 
 ----------------------- EMPLOYEES ----------------------------------
 CREATE TABLE employees(
-	serial_no SERIAL UNIQUE NOT NULL,
+	serial_no INT IDENTITY(1, 1) UNIQUE NOT NULL,
 	emp_code VARCHAR(100) PRIMARY KEY,
 	dept_code VARCHAR(100),
 	company_id INT,
@@ -53,7 +54,7 @@ CREATE TABLE employees(
 		REFERENCES department(dept_code) ON UPDATE CASCADE ON DELETE CASCADE,
 
 	FOREIGN KEY (company_id)
-		REFERENCES company(company_id) ON UPDATE CASCADE ON DELETE CASCADE
+		REFERENCES company(company_id) ON UPDATE NO ACTION ON DELETE NO ACTION
 );
 
 SELECT * FROM employees;
@@ -71,7 +72,7 @@ DELETE FROM employees WHERE emp_code = 'IT5054';
 
 ----------------------- EMPLOYEE DETAILS ----------------------------------
 CREATE TABLE employee_detail(
-	serial_no SERIAL UNIQUE NOT NULL,
+	serial_no INT IDENTITY(1, 1) UNIQUE NOT NULL,
 	emp_code VARCHAR(100),
 	emp_name VARCHAR(100) NOT NULL,
 	emp_email VARCHAR(100),
@@ -98,10 +99,12 @@ DELETE FROM employee_detail WHERE emp_code = 'IT5055';
 
 --------------------------- CREATING VIEW -----------------------------------------
 -- Create a view with company employee count
+
 CREATE VIEW company_with_emp_count AS
-SELECT c.company_id, c.company_name, COUNT(e.*) AS total_emp
-FROM company c JOIN employees e ON c.company_id = e.company_id
-GROUP BY c.company_id;
+SELECT c.company_id, c.company_name, COUNT(*) AS total_emp
+FROM company c
+INNER JOIN employees e ON c.company_id = e.company_id
+GROUP BY c.company_id, c.company_name;
 
 SELECT * FROM company_with_emp_count;
 
@@ -122,3 +125,20 @@ FROM employees e
 SELECT * FROM emp_working_dept;
 --------------------------- CREATING VIEW -----------------------------------------
 
+CREATE INDEX dept_code_indx ON department(dept_code);
+DROP INDEX dept_code_indx;
+
+BEGIN TRANSACTION
+...
+...
+END TRANSACTION
+COMMIT
+
+-- ATOMICITY (either every transaction will commit or neither will)
+/*
+ACID Property
+Atomicity
+Consistency
+Integrity
+Durability
+*/
